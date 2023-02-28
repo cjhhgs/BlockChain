@@ -1,0 +1,3 @@
+centerAddr: http://localhost:8081
+accountPath: D:\gitdemo\BlockChain\mine\account.txt
+targetBits: 22

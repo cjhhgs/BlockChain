@@ -1,0 +1,5 @@
+com\jhchen\service\BlockChainServiceTest.class
+com\jhchen\service\AccountServiceTest.class
+com\jhchen\utils\HttpUtilTest.class
+com\jhchen\service\ECCServiceTest.class
+com\jhchen\service\TransactionServiceTest.class
