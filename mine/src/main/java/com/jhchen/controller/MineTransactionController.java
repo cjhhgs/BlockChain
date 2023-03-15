@@ -1,7 +1,6 @@
 package com.jhchen.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.jhchen.domain.AppHttpCodeEnum;
 import com.jhchen.domain.ResponseResult;
 import com.jhchen.domain.modul.Account;
@@ -26,7 +25,7 @@ import java.util.List;
 
 @RestController
 @Api(tags = "交易相关api")
-public class TransactionController {
+public class MineTransactionController {
     @Value("${centerAddr}")
     String centerAddr;
     @Autowired

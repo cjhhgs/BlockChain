@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
         protocols = "http",
         value = "区块链账户注册"
 )
-public class AccountController {
+public class CenterAccountController {
     @Autowired
     private AccountService registerService;
     @Autowired

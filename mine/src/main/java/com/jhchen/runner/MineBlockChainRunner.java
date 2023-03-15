@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class BlockChainRunner implements CommandLineRunner {
+public class MineBlockChainRunner implements CommandLineRunner {
     @Autowired
     private List<Block> blockChain;
     @Autowired

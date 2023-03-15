@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @Api(tags = "处理区块")
-public class BlockChainController {
+public class CenterBlockChainController {
     @Autowired
     CenterService centerService;
     @Autowired
