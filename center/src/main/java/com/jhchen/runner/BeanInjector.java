@@ -3,6 +3,7 @@ package com.jhchen.runner;
 import com.jhchen.domain.modul.Block;
 import com.jhchen.domain.modul.SignedTransaction;
 import com.jhchen.domain.modul.Account;
+import com.jhchen.domain.modul.TransactionPool;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +22,10 @@ public class BeanInjector {
         blockChain.add(block);
         return blockChain;
     }
-
+    @Bean("transactionPool")
+    private TransactionPool transactionPool(){
+        return new TransactionPool();
+    }
 
     @Bean("transactionList")
     private List<SignedTransaction> transactionList(){

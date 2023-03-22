@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -17,6 +18,8 @@ import java.util.stream.Collectors;
 public class CenterService {
     @Autowired
     private List<SignedTransaction> transactionList;
+    @Autowired
+    private TransactionPool transactionPool;
     @Autowired
     private  List<Account> accountList;
     @Autowired
@@ -31,7 +34,11 @@ public class CenterService {
         if(transactionService.verify(transaction).equals(false)){
             return ResponseResult.errorResult(AppHttpCodeEnum.SIGN_NOT_VERIFY);
         }
-        transactionList.add(transaction);
+        transactionPool.add(transaction);
+        return ResponseResult.okResult();
+    }
+
+    public ResponseResult showTransactions(){
         return ResponseResult.okResult();
     }
 
@@ -69,45 +76,32 @@ public class CenterService {
         //验证包含的交易信息是否正确
         List<SignedTransaction> body = block.getBody();
         System.out.println("5");
-        if(verifyBlockBody(body)==false){
+        if(verifyBlockBody(body,block.getMinerAddr())==false){
             return ResponseResult.errorResult(AppHttpCodeEnum.BLOCK_NOT_VERIFIED);
         }
+
         System.out.println("6");
+        //将交易移入已完成列表
+        finishTrans(body,new Date());
+        //添加区块
         blockChain.add(block);
         return ResponseResult.okResult(block);
     }
 
-    public Boolean verifyBlockBody(List<SignedTransaction> body){
+    public Boolean verifyBlockBody(List<SignedTransaction> body,String minerAddr){
         AtomicReference<Boolean> res = new AtomicReference<>(true);
         Boolean result = true;
+        //在已分配交易列表中找到item
         for (SignedTransaction item : body) {
-            Boolean flag = false;
-            String s1 = JSON.toJSONString(item);
-            System.out.println("body:"+JSON.toJSONString(item));
-            for (SignedTransaction transaction : transactionList) {
-                String s2 = JSON.toJSONString(transaction);
-                System.out.println("tran:"+JSON.toJSONString(transaction));
-                System.out.println(s1.equals(s2));
-                if(s1.equals(s2)==true){
-                    flag=true;
-                    break;
-                }
-            }
+            Boolean flag = transactionPool.find(item,minerAddr);
             if(flag==false){res.set(false);result = false;}
         }
-        System.out.println(res.get());
-        System.out.println(result);
         return res.get();
     }
 
-    public void finishTrans(List<SignedTransaction> body){
+    public void finishTrans(List<SignedTransaction> body, Date date){
         for (SignedTransaction item : body) {
-            for (SignedTransaction signedTransaction : transactionList) {
-                if(signedTransaction.equals(item)){
-                    signedTransaction.setFinished(true);
-                    break;
-                }
-            }
+            transactionPool.finish(item,date);
         }
     }
 }

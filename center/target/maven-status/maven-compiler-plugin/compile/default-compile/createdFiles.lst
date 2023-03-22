@@ -1,8 +1,8 @@
 com\jhchen\CenterApplication.class
-com\jhchen\controller\BlockChainController.class
 com\jhchen\config\CenterConfig.class
-com\jhchen\controller\TransactionController.class
 com\jhchen\runner\BeanInjector.class
+com\jhchen\controller\CenterBlockChainController.class
 com\jhchen\service\CenterService.class
-com\jhchen\controller\AccountController.class
+com\jhchen\controller\CenterAccountController.class
+com\jhchen\controller\CenterTransactionController.class
 com\jhchen\runner\CenterRunner.class

@@ -1,7 +1,8 @@
 com\jhchen\MineApplication.class
-com\jhchen\runner\BlockChainRunner.class
 com\jhchen\service\MineService.class
 com\jhchen\config\BeanInjector.class
+com\jhchen\view\InitSceneView.class
 com\jhchen\controller\MineController.class
 com\jhchen\utils\JSONUtil.class
 com\jhchen\controller\MineTransactionController.class
+com\jhchen\runner\MineBlockChainRunner.class

@@ -2,6 +2,8 @@ package com.jhchen.controller;
 
 import com.jhchen.domain.ResponseResult;
 import com.jhchen.domain.modul.SignedTransaction;
+import com.jhchen.domain.modul.TransactionPool;
+import com.jhchen.domain.modul.TransactionPoolItem;
 import com.jhchen.service.CenterService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,8 @@ public class CenterTransactionController {
     CenterService centerService;
     @Autowired
     List<SignedTransaction> transactionList;
+    @Autowired
+    TransactionPool transactionPool;
 
     @PostMapping("/addTransaction")
     public ResponseResult addTransaction(@RequestBody SignedTransaction transaction){
@@ -27,7 +31,7 @@ public class CenterTransactionController {
 
     @GetMapping("/showTransactions")
     public ResponseResult showTransactions(){
-        return ResponseResult.okResult(transactionList);
+        return ResponseResult.okResult(transactionPool);
     }
 
 }

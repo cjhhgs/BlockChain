@@ -31,6 +31,8 @@ public class Block {
     private Long timestamp = 0L;
     @ApiModelProperty("交易列表")
     private List<SignedTransaction> body;
+    @ApiModelProperty("矿工addr")
+    private String minerAddr;
 
     public Block(Block block) {
         System.out.println(block.toString());
@@ -52,7 +54,7 @@ public class Block {
 
     public void finish(){
         body.stream().forEach((item)->{
-            item.setFinished(true);
+            //item.setFinished(true);
         });
     }
     public static Block genesisBlock(){
