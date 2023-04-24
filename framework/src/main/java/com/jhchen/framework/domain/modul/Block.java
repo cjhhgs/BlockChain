@@ -19,10 +19,14 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Block {
+    @ApiModelProperty("区块高度")
+    private Integer height;
     @ApiModelProperty("区块id")
     private String id;
     @ApiModelProperty("前区块id")
     private String preID;
+    @ApiModelProperty("merkle根")
+    private String merkle;
     @ApiModelProperty("难度系数")
     private int targetBits;
     @ApiModelProperty("工作量证明")
@@ -37,6 +41,7 @@ public class Block {
     public Block(Block block) {
         System.out.println(block.toString());
         //
+        this.height = block.getHeight();
         this.id = block.getId();
         this.preID = block.getPreID();
         this.targetBits = block.getTargetBits();
@@ -60,6 +65,7 @@ public class Block {
     public static Block genesisBlock(){
         Block block = new Block();
         block.setId("0");
+        block.setHeight(0);
         return block;
     }
 

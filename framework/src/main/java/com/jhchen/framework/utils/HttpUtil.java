@@ -1,5 +1,6 @@
 package com.jhchen.framework.utils;
 
+import com.jhchen.framework.domain.modul.Account;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -10,6 +11,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.util.List;
 
 public class HttpUtil {
     /**
@@ -64,5 +66,20 @@ public class HttpUtil {
         httpGet.abort();
         httpClient.getConnectionManager().shutdown();
         return result;
+    }
+
+    /**
+     * 向指定账户广播信息
+     * @param route
+     * @param data
+     * @param accountList
+     */
+    public static void broadcastMessage(String route, String data, List<Account> accountList) throws IOException {
+        for (Account account : accountList) {
+            String ip = account.getIp();
+            if(ip!=null){
+                HttpUtil.post(ip+route,data);
+            }
+        }
     }
 }

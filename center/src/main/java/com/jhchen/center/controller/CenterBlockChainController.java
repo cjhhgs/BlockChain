@@ -1,6 +1,6 @@
 package com.jhchen.center.controller;
 
-import com.jhchen.center.service.CenterService;
+import com.jhchen.center.service.CenterBlockChainService;
 import com.jhchen.framework.domain.ResponseResult;
 import com.jhchen.framework.domain.modul.Block;
 import io.swagger.annotations.Api;
@@ -17,7 +17,7 @@ import java.util.List;
 @Api(tags = "处理区块")
 public class CenterBlockChainController {
     @Autowired
-    CenterService centerService;
+    CenterBlockChainService centerBlockChainService;
     @Autowired
     List<Block> blockChain;
 
@@ -32,7 +32,7 @@ public class CenterBlockChainController {
 
     @PostMapping("/addBlock")
     public ResponseResult addBlock(@RequestBody Block block){
-        return centerService.addBlock(block);
+        return centerBlockChainService.addBlock(block);
 
     }
 }

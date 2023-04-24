@@ -3,6 +3,7 @@ package com.jhchen.mine.config;
 import com.jhchen.framework.domain.modul.Account;
 import com.jhchen.framework.domain.modul.Block;
 import com.jhchen.framework.domain.modul.SignedTransaction;
+import com.jhchen.framework.domain.modul.TransactionPool;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,14 +27,15 @@ public class MineBeanInjector {
         return blockChain;
     }
 
-    @Bean("transactionList")
-    public List<SignedTransaction> transactionList(){
-        return new ArrayList<SignedTransaction>();
-    }
+    @Bean("transactionPool")//交易池
+    public TransactionPool transactionPool(){return new TransactionPool();}
 
-    @Bean("account")
+    @Bean("account")//本地账户
     public Account userAccount(){
         return new Account();
     }
+
+    @Bean("accountList")//网络所有节点
+    public List<Account> accountList(){return new ArrayList<>();}
 
 }

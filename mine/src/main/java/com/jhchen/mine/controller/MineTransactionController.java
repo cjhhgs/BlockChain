@@ -3,13 +3,12 @@ package com.jhchen.mine.controller;
 import com.alibaba.fastjson.JSON;
 import com.jhchen.framework.domain.AppHttpCodeEnum;
 import com.jhchen.framework.domain.ResponseResult;
-import com.jhchen.framework.domain.modul.Account;
-import com.jhchen.framework.domain.modul.SignedTransaction;
-import com.jhchen.framework.domain.modul.Transaction;
+import com.jhchen.framework.domain.modul.*;
 import com.jhchen.framework.service.AccountService;
 import com.jhchen.framework.service.TransactionService;
 import com.jhchen.framework.utils.HttpUtil;
 import com.jhchen.mine.service.MineService;
+import com.jhchen.mine.service.MineTransactionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -26,26 +25,19 @@ import java.util.List;
 @RestController
 @Api(tags = "交易相关api")
 public class MineTransactionController {
-    @Value("${centerAddr}")
-    String centerAddr;
     @Autowired
     MineService mineService;
     @Autowired
-    AccountService accountService;
-    @Autowired
-    TransactionService transactionService;
+    MineTransactionService mineTransactionService;
     @Autowired
     Account account;
     @Autowired
-    List<SignedTransaction> transactionList;
+    TransactionPool transactionPool;
 
     @GetMapping("/showTransactions")
     @ApiOperation(value = "查看目前交易列表")
     public ResponseResult transactions(){
-        for (SignedTransaction transaction : transactionList) {
-            System.out.println(transaction);
-        }
-        return ResponseResult.okResult(transactionList);
+        return ResponseResult.okResult(transactionPool);
     }
 
     @GetMapping("/getTransactions")
@@ -58,19 +50,20 @@ public class MineTransactionController {
     @ApiOperation(value = "创建交易")
     @ApiParam(name = "transaction")
     public ResponseResult createTransaction(@RequestBody Transaction transaction){
+        return mineTransactionService.buildTransaction(transaction);
+    }
 
-        System.out.println(transaction);
-        SignedTransaction signedTransaction = transactionService.signTransaction(transaction, account);
+    @PostMapping("/addTransaction")
+    @ApiOperation(value = "接受一个新交易")
+    @ApiParam(name = "transaction")
+    public ResponseResult addTransaction(@RequestBody SignedTransaction signedTransaction){
+        return mineTransactionService.addTransaction(signedTransaction);
+    }
 
-        transactionList.add(signedTransaction);
-
-        String s = JSON.toJSONString(signedTransaction);
-        try {
-            HttpUtil.post(centerAddr+"/addTransaction",s);
-        } catch (IOException e) {
-            return ResponseResult.errorResult(AppHttpCodeEnum.HTTP_ERROR);
-        }
-        System.out.println(s);
-        return ResponseResult.okResult(signedTransaction);
+    @PostMapping("/alloc")
+    @ApiOperation(value = "交易分配指令")
+    @ApiParam(name = "transactionPoolItemList")
+    public ResponseResult alloc(@RequestBody List<TransactionPoolItem> transactionPoolItemList){
+        return mineTransactionService.alloc(transactionPoolItemList);
     }
 }

@@ -72,15 +72,19 @@ public class BlockGenerateService {
      * @param targetBits
      * @return
      */
-    public Block generateBlock(List<SignedTransaction> body,String preID,Integer targetBits){
-        String id = generateHash(body);
+    public Block generateBlock(List<SignedTransaction> body,String preID,Integer targetBits,Integer height){
+        String merkle = generateHash(body);
+        long time = Instant.now().getEpochSecond();
+        String id = DigestUtils.sha256Hex(preID + merkle + time);
         Block block = new Block();
 
         List<SignedTransaction> list = body.stream().collect(Collectors.toList());
         block.setBody(list);
+        block.setMerkle(merkle);
         block.setId(id);
         block.setPreID(preID);
-        block.setTimestamp(Instant.now().getEpochSecond());
+        block.setTimestamp(time);
+        block.setHeight(height);
 
         block.setTargetBits(targetBits);
 

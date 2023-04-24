@@ -22,8 +22,13 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class BlockVerifyService {
     public Boolean verifyBlock(Block block){
-        BigInteger targetValue = BigInteger.valueOf(1).shiftLeft((256 - block.getTargetBits()));
+        //验证hash
+        String tarId = DigestUtils.sha256Hex(block.getPreID() + block.getMerkle() + block.getTimestamp());
+        if(!tarId.equals(block.getId()))
+            return false;
 
+        //验证Nonce
+        BigInteger targetValue = BigInteger.valueOf(1).shiftLeft((256 - block.getTargetBits()));
         String hash = block.getId()+block.getPreID()+block.getNonce().toString();
         String s = DigestUtils.sha256Hex(hash);
         BigInteger bigInteger = new BigInteger(s, 16);
@@ -64,10 +69,9 @@ public class BlockVerifyService {
         //验证包含的交易信息是否正确
         List<SignedTransaction> body = block.getBody();
         System.out.println("5");
-        if(verifyBlockBody(body,block.getMinerAddr(),transactionPool)==false){
+        if(verifyBlockBody(body,block.getMinerAddr(),transactionPool,block.getHeight())==false){
             return ResponseResult.errorResult(AppHttpCodeEnum.BLOCK_NOT_VERIFIED);
         }
-
         System.out.println("6");
         //将交易移入已完成列表
         finishTrans(body,new Date(),transactionPool);
@@ -76,13 +80,23 @@ public class BlockVerifyService {
         return ResponseResult.okResult(block);
     }
 
-    public Boolean verifyBlockBody(List<SignedTransaction> body, String minerAddr, TransactionPool transactionPool){
+    /**
+     * 验证区块体，是否按照分配
+     * @param body
+     * @param minerAddr
+     * @param transactionPool
+     * @return
+     */
+    public Boolean verifyBlockBody(List<SignedTransaction> body, String minerAddr, TransactionPool transactionPool, Integer height){
         AtomicReference<Boolean> res = new AtomicReference<>(true);
-        Boolean result = true;
-        //在已分配交易列表中找到item
+
         for (SignedTransaction item : body) {
-            Boolean flag = transactionPool.find(item,minerAddr);
-            if(flag==false){res.set(false);result = false;}
+            //在已分配交易列表中找到item
+            Boolean flag = transactionPool.find(item,minerAddr,height);
+            if(flag==false){
+                res.set(false);
+                break;
+            }
         }
         return res.get();
     }

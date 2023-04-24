@@ -3,6 +3,7 @@ package com.jhchen.framework.domain.modul;
 import lombok.Data;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author chen.jiahao
@@ -21,11 +22,17 @@ public class TransactionPool {
     private List<TransactionPoolItem> finishedTransactionList;
 
     /**
-     * 接收一笔新的交易
+     * 接收一笔新的交易，不重复
      * @param transaction
      */
     public void add(SignedTransaction transaction){
-        transactionList.add(transaction);
+        AtomicReference<Boolean> flag = new AtomicReference<>(true);
+        transactionList.stream().forEach(i -> {
+            if(i.equals(transaction))
+                flag.set(false);
+        });
+        if(flag.get()==true)
+            transactionList.add(transaction);
     }
 
 
@@ -54,7 +61,6 @@ public class TransactionPool {
     public void allocate(SignedTransaction transaction, String minerAddr){
         //在未分配中寻找是否有
         Iterator<SignedTransaction> iterator = transactionList.iterator();
-        Boolean flag = false;
         while (iterator.hasNext()){
             SignedTransaction next = iterator.next();
             if(next.equals(transaction))
@@ -72,11 +78,13 @@ public class TransactionPool {
      * @param minerAddr
      * @return
      */
-    public boolean find(SignedTransaction transaction,String minerAddr){
+    public boolean find(SignedTransaction transaction,String minerAddr, Integer height){
         Iterator<TransactionPoolItem> iterator = allocatedTransactionList.iterator();
         while (iterator.hasNext()){
             TransactionPoolItem transactionPoolItem = iterator.next();
-            if(transactionPoolItem.equals(transaction)&&transactionPoolItem.getMinerAddr().equals(minerAddr)){
+            if(transactionPoolItem.equals(transaction)
+                    && transactionPoolItem.getMinerAddr().equals(minerAddr)
+                    &&transactionPoolItem.getHeight().equals(height)){
                 return true;
             }
         }

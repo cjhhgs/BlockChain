@@ -1,6 +1,7 @@
 package com.jhchen.center.controller;
 
-import com.jhchen.center.service.CenterService;
+import com.jhchen.center.service.CenterBlockChainService;
+import com.jhchen.center.service.CenterTransService;
 import com.jhchen.framework.domain.ResponseResult;
 import com.jhchen.framework.domain.modul.SignedTransaction;
 import com.jhchen.framework.domain.modul.TransactionPool;
@@ -18,16 +19,14 @@ import java.util.List;
 @Api(tags = "交易处理")
 public class CenterTransactionController {
     @Autowired
-    CenterService centerService;
-    @Autowired
-    List<SignedTransaction> transactionList;
+    CenterTransService centerTransService;
     @Autowired
     TransactionPool transactionPool;
 
     @PostMapping("/addTransaction")
     @ApiOperation(value = "接收一个新的交易")
     public ResponseResult addTransaction(@RequestBody SignedTransaction transaction){
-        return centerService.addTransaction(transaction);
+        return centerTransService.addTransaction(transaction);
     }
 
     @GetMapping("/showTransactions")
@@ -39,7 +38,6 @@ public class CenterTransactionController {
     @GetMapping("/allocTransaction")
     @ApiOperation(value = "自动分配任务")
     public ResponseResult allocTransaction(){
-        return null;
-        //TODO:
+        return centerTransService.allocate();
     }
 }

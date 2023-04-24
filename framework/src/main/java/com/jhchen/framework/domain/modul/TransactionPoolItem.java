@@ -18,6 +18,7 @@ public class TransactionPoolItem {
     private Boolean finished;
     private Date allocateTime;
     private Date finishTime;
+    private Integer height;
 
     public TransactionPoolItem(SignedTransaction transaction,String minerAddr){
         this.transaction = new SignedTransaction(transaction);
@@ -25,10 +26,16 @@ public class TransactionPoolItem {
         finished = false;
         allocateTime = new Date();
         finishTime = null;
+        height = -1;
+    }
+
+    public TransactionPoolItem(TransactionPoolItem transactionPoolItem) {
+        this.transaction = new SignedTransaction(transactionPoolItem.getTransaction());
+        this.minerAddr = new String(transactionPoolItem.getMinerAddr());
+        this.height = new Integer(transactionPoolItem.getHeight());
     }
 
     public Boolean equals(SignedTransaction signedTransaction){
-
         return this.transaction.equals(signedTransaction);
     }
 }

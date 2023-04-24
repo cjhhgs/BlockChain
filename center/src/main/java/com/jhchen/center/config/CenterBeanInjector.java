@@ -17,7 +17,7 @@ import static com.jhchen.framework.domain.modul.Block.genesisBlock;
 
 @Component
 public class CenterBeanInjector {
-    @Bean("centerBlockChain")
+    @Bean("blockChain")
     private List<Block> blockChain(){
 
         List<Block> blockChain = new ArrayList<Block>();
@@ -39,9 +39,11 @@ public class CenterBeanInjector {
     private List<SignedTransaction> transactionList(){
         return new ArrayList<SignedTransaction>();
     }
-    @Bean("AccountList")
+    @Bean("AccountList")//全网节点
     private List<Account> accountList(){
         return new ArrayList<Account>();
     }
+    @Bean("height")
+    private Integer height(){return new Integer(1);}
 
 }
