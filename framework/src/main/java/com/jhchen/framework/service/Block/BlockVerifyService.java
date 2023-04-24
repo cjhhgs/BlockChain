@@ -7,6 +7,7 @@ import com.jhchen.framework.domain.modul.Block;
 import com.jhchen.framework.domain.modul.SignedTransaction;
 import com.jhchen.framework.domain.modul.TransactionPool;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.util.Date;
@@ -20,6 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @createDate 2023/3/22 17:21
  * @since 1.0.0
  */
+@Service
 public class BlockVerifyService {
     public Boolean verifyBlock(Block block){
         //验证hash
