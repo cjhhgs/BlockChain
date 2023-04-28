@@ -11,6 +11,7 @@ import com.jhchen.framework.service.TransactionService;
 import com.jhchen.framework.utils.HttpUtil;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -30,8 +31,10 @@ public class CenterTransService {
     @Autowired
     TransactionPool transactionPool;
     @Autowired
+    @Qualifier("accountList")
     List<Account> accountList;
     @Autowired
+    @Qualifier("waitList")
     Queue<Account> waitList;
     @Autowired
     private TransactionService transactionService;
@@ -48,6 +51,11 @@ public class CenterTransService {
             return ResponseResult.errorResult(AppHttpCodeEnum.SIGN_NOT_VERIFY);
         }
         transactionPool.add(transaction);
+        try {
+            HttpUtil.broadcastMessage("/addTransaction",JSON.toJSONString(transaction),accountList);
+        } catch (IOException e) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.HTTP_ERROR);
+        }
         return ResponseResult.okResult();
     }
 
@@ -56,22 +64,23 @@ public class CenterTransService {
      */
     public ResponseResult allocate(){
         //获取队列中第一个账户
-        Account account = waitList.poll();
+        Account tarAccount = waitList.poll();
         //取出未分配的交易，默认2条
         List<SignedTransaction> unallocated = transactionPool.getUnallocated(2);
         // 包装成已分配交易
         List<TransactionPoolItem> collect = unallocated.stream().map(i -> {
-            TransactionPoolItem transactionPoolItem = new TransactionPoolItem(i, account.getAddr());
+            TransactionPoolItem transactionPoolItem = new TransactionPoolItem(i, tarAccount.getAddr());
             //设置层数
-            transactionPoolItem.setHeight(height);height++;
+            transactionPoolItem.setHeight(height);
             return transactionPoolItem;
         }).collect(Collectors.toList());
+        height++;
         try {
             HttpUtil.broadcastMessage("/alloc", JSON.toJSONString(collect),accountList);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        unallocated.stream().forEach(i -> transactionPool.allocate(i, account.getAddr()));
+        unallocated.stream().forEach(i -> transactionPool.allocate(i, tarAccount.getAddr()));
         return ResponseResult.okResult();
     }
 

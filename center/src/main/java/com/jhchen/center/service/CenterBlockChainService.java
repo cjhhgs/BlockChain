@@ -10,6 +10,7 @@ import com.jhchen.framework.domain.modul.TransactionPool;
 import com.jhchen.framework.service.Block.BlockVerifyService;
 import com.jhchen.framework.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ public class CenterBlockChainService {
     @Autowired
     private TransactionPool transactionPool;
     @Autowired
+    @Qualifier("accountList")
     private  List<Account> accountList;
     @Autowired
     private List<Block> blockChain;

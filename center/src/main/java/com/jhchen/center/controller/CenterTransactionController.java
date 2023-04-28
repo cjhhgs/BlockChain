@@ -1,5 +1,6 @@
 package com.jhchen.center.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.jhchen.center.service.CenterBlockChainService;
 import com.jhchen.center.service.CenterTransService;
 import com.jhchen.framework.domain.ResponseResult;
@@ -32,7 +33,7 @@ public class CenterTransactionController {
     @GetMapping("/showTransactions")
     @ApiOperation(value = "显示交易列表")
     public ResponseResult showTransactions(){
-        return ResponseResult.okResult(transactionPool);
+        return ResponseResult.okResult(JSON.toJSONString(transactionPool));
     }
 
     @GetMapping("/allocTransaction")

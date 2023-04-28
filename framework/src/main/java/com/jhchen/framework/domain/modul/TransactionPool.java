@@ -1,6 +1,8 @@
 package com.jhchen.framework.domain.modul;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -13,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @since 1.0.0
  */
 @Data
+@AllArgsConstructor
 public class TransactionPool {
     //未分配交易池
     private Queue<SignedTransaction> transactionList;
@@ -20,6 +23,12 @@ public class TransactionPool {
     private List<TransactionPoolItem> allocatedTransactionList;
     //已完成交易池
     private List<TransactionPoolItem> finishedTransactionList;
+
+    public TransactionPool(){
+        transactionList = new LinkedList<>();
+        allocatedTransactionList = new ArrayList<>();
+        finishedTransactionList = new ArrayList<>();
+    }
 
     /**
      * 接收一笔新的交易，不重复

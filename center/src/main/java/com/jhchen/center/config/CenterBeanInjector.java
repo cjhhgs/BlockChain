@@ -39,7 +39,7 @@ public class CenterBeanInjector {
     private List<SignedTransaction> transactionList(){
         return new ArrayList<SignedTransaction>();
     }
-    @Bean("AccountList")//全网节点
+    @Bean("accountList")//全网节点
     private List<Account> accountList(){
         return new ArrayList<Account>();
     }

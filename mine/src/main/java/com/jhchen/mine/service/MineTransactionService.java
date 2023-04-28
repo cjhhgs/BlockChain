@@ -6,6 +6,7 @@ import com.jhchen.framework.domain.modul.*;
 import com.jhchen.framework.service.TransactionService;
 import com.jhchen.framework.utils.HttpUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ public class MineTransactionService {
     @Autowired
     Account account;
     @Autowired
+    @Qualifier("accountList")
     List<Account> accountList;
     @Value("${centerAddr}")
     String centerAddr;

@@ -10,8 +10,10 @@ import com.jhchen.mine.service.MineService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -27,6 +29,9 @@ public class MineController {
     AccountService accountService;
     @Autowired
     Account account;
+    @Autowired
+    @Qualifier("accountList")
+    List<Account> accountList;
     @Autowired
     List<Block> blockChain;
 
@@ -61,13 +66,18 @@ public class MineController {
             e.printStackTrace();
             return ResponseResult.errorResult(AppHttpCodeEnum.ACCOUNT_LOAD_ERROR);
         }
-
     }
 
-    @GetMapping("/register")
-    @ApiOperation(value = "向中心节点注册")
+    @GetMapping("/registerToOther")
+    @ApiOperation(value = "向所有节点注册")
+    public ResponseResult registerToOther(){
+        return mineService.register();
+    }
+
+    @PostMapping("/register")
+    @ApiOperation(value = "接受节点网络注册")
     public ResponseResult register(){
-        mineService.register();
+        accountList.add(account);
         return ResponseResult.okResult();
     }
 

@@ -10,6 +10,7 @@ import com.jhchen.framework.utils.HttpUtil;
 import com.jhchen.mine.utils.JSONUtil;
 import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ public class MineService {
     @Value("${centerAddr}")
     private String centerAddr;
     @Autowired
+    @Qualifier("accountList")
     List<Account> accountList;
 
     @Value("${accountPath}")
@@ -67,14 +69,15 @@ public class MineService {
     /**
      * 向其他节点注册
      */
-    public void register(){
+    public ResponseResult register(){
         Account a = new Account();
         a.setAddr(account.getAddr());
         a.setIp(account.getIp());
         try {
             HttpUtil.broadcastMessage("/register",JSON.toJSONString(a),accountList);
+            return ResponseResult.okResult();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return ResponseResult.errorResult(AppHttpCodeEnum.HTTP_ERROR);
         }
     }
 
@@ -148,6 +151,7 @@ public class MineService {
         try {
             String s = HttpUtil.get(centerAddr + "/showTransactions");
             JSONObject object = JSONObject.parseObject(s);
+            System.out.println(object);
             TransactionPool data = JSON.parseObject(object.getString("data"), TransactionPool.class);
             transactionPool = data;
             return ResponseResult.okResult(transactionPool);
