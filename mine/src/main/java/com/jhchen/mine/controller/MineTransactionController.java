@@ -40,6 +40,12 @@ public class MineTransactionController {
         return ResponseResult.okResult(transactionPool);
     }
 
+    @PostMapping("/updateTrans")
+    @ApiOperation("更新交易池")
+    public ResponseResult updateTrans(@RequestBody TransactionPool transactionPoolUpdate){
+        transactionPool = transactionPoolUpdate;
+        return ResponseResult.okResult(transactionPool);
+    }
     @GetMapping("/getTransactions")
     @ApiOperation(value = "从中心获取交易列表")
     public ResponseResult getTransactions(){

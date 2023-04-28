@@ -56,7 +56,19 @@ public class CenterTransService {
         } catch (IOException e) {
             return ResponseResult.errorResult(AppHttpCodeEnum.HTTP_ERROR);
         }
+        announceTrans();
         return ResponseResult.okResult();
+    }
+
+    /**
+     * 广播TransPool
+     */
+    public void announceTrans(){
+        try {
+            HttpUtil.broadcastMessage("/updateTrans",transactionPool.toString(),accountList);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
