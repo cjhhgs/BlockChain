@@ -36,7 +36,7 @@ public class MineTransactionController {
 
     @GetMapping("/showTransactions")
     @ApiOperation(value = "查看目前交易列表")
-    public ResponseResult transactions(){
+    public ResponseResult showTransactions(){
         return ResponseResult.okResult(transactionPool);
     }
 

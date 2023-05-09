@@ -33,7 +33,7 @@ public class CenterTransactionController {
     @GetMapping("/showTransactions")
     @ApiOperation(value = "显示交易列表")
     public ResponseResult showTransactions(){
-        return ResponseResult.okResult(JSON.toJSONString(transactionPool));
+        return ResponseResult.okResult(transactionPool);
     }
 
     @GetMapping("/allocTransaction")

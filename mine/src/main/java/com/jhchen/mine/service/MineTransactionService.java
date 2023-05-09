@@ -74,9 +74,9 @@ public class MineTransactionService {
         //TODO:检查是否有中央账户的签名
         //逐个分配
         for (TransactionPoolItem transactionPoolItem : transactionPoolItemList) {
-            transactionPool.allocate(transactionPoolItem.getTransaction(),transactionPoolItem.getMinerAddr());
+            transactionPool.allocate(transactionPoolItem.getTransaction(),transactionPoolItem.getMinerAddr(),transactionPoolItem.getHeight());
         }
-        return ResponseResult.okResult();
+        return ResponseResult.okResult(transactionPool);
     }
 
     /**

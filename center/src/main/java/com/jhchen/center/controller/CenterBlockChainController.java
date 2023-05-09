@@ -5,6 +5,7 @@ import com.jhchen.framework.domain.ResponseResult;
 import com.jhchen.framework.domain.modul.Block;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,9 @@ public class CenterBlockChainController {
     CenterBlockChainService centerBlockChainService;
     @Autowired
     List<Block> blockChain;
+    @Autowired
+    List<String> idList;
+
 
     @GetMapping("/showBlockChain")
     public ResponseResult showBlockChain(){
@@ -34,5 +38,10 @@ public class CenterBlockChainController {
     public ResponseResult addBlock(@RequestBody Block block){
         return centerBlockChainService.addBlock(block);
 
+    }
+
+    @GetMapping("/getIdList")
+    public ResponseResult getIdList(){
+        return ResponseResult.okResult(idList);
     }
 }

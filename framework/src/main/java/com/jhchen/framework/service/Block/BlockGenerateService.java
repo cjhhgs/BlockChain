@@ -75,7 +75,7 @@ public class BlockGenerateService {
     public Block generateBlock(List<SignedTransaction> body,String preID,Integer targetBits,Integer height){
         String merkle = generateHash(body);
         long time = Instant.now().getEpochSecond();
-        String id = DigestUtils.sha256Hex(preID + merkle + time);
+        String id = DigestUtils.sha256Hex(preID + merkle);
         Block block = new Block();
 
         List<SignedTransaction> list = body.stream().collect(Collectors.toList());

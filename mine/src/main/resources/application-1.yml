@@ -1,4 +1,6 @@
 centerAddr: http://localhost:1000
+accountPath: account1.txt
 targetBits: 22
 server:
-  port: 8080
+  port: 8081
+

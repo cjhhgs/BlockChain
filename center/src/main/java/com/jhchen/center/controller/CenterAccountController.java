@@ -1,6 +1,7 @@
 package com.jhchen.center.controller;
 
 
+import com.jhchen.center.service.CenterAccountService;
 import com.jhchen.framework.domain.AppHttpCodeEnum;
 import com.jhchen.framework.domain.ResponseResult;
 import com.jhchen.framework.domain.modul.Account;
@@ -28,6 +29,8 @@ public class CenterAccountController {
     @Autowired
     private AccountService registerService;
     @Autowired
+    private CenterAccountService centerAccountService;
+    @Autowired
     private Queue<Account> waitList;
     @Autowired
     @Qualifier("accountList")
@@ -49,26 +52,23 @@ public class CenterAccountController {
     @PostMapping("/register")
     @ApiOperation(value = "账户注册为挖矿节点")
     public ResponseResult register(@RequestBody Account account){
-        accountList.add(account);
-        return ResponseResult.okResult();
+        return centerAccountService.register(account);
     }
 
     @PostMapping("/queue")
     @ApiOperation(value = "账户进入排队队列")
     public ResponseResult queue(@RequestBody Account account){
-        //
-        waitList.add(account);
-        return ResponseResult.okResult(account);
+        return centerAccountService.queue(account);
     }
-    @PostMapping("/showAccount")
+    @GetMapping("/showAccount")
     @ApiOperation(value = "显示所有注册账户")
-    public ResponseResult showAccount(@RequestBody Account account){
+    public ResponseResult showAccount(){
         return ResponseResult.okResult(accountList);
     }
 
-    @PostMapping("/showQueue")
+    @GetMapping("/showQueue")
     @ApiOperation(value = "显示等待队列")
-    public ResponseResult showQueue(@RequestBody Account account){
+    public ResponseResult showQueue(){
         return ResponseResult.okResult(waitList);
     }
 }

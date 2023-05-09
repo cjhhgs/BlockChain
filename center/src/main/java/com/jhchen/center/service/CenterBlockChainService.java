@@ -33,6 +33,9 @@ public class CenterBlockChainService {
     private TransactionService transactionService;
     @Autowired
     private BlockVerifyService blockVerifyService;
+    @Autowired
+    @Qualifier("ackList")
+    List<Integer> ackList;
 
     @Value("${targetBits}")
     private String targetBits;
@@ -45,6 +48,12 @@ public class CenterBlockChainService {
      */
     public ResponseResult addBlock(Block block){
         ResponseResult responseResult = blockVerifyService.addBlock(block, targetBits, blockChain, transactionPool);
+        if(responseResult.getCode()==AppHttpCodeEnum.SUCCESS.getCode()){
+            while(ackList.size()<block.getHeight()){
+                ackList.add(null);
+            }
+            ackList.set(block.getHeight(),1);
+        }
         return responseResult;
     }
 

@@ -21,8 +21,6 @@ import java.util.List;
 @RestController
 @Api(tags = "挖矿节点Api")
 public class MineController {
-    @Value("${centerAddr}")
-    private String centerAddr;
     @Autowired
     MineService mineService;
     @Autowired
@@ -72,6 +70,12 @@ public class MineController {
     @ApiOperation(value = "向所有节点注册")
     public ResponseResult registerToOther(){
         return mineService.register();
+    }
+
+    @GetMapping("/inQueue")
+    @ApiOperation(value = "申请入队")
+    public ResponseResult inQueue(){
+        return mineService.inQueue();
     }
 
     @PostMapping("/register")

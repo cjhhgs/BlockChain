@@ -1,6 +1,0 @@
-{
-	"addr":"18Tb9QqqgRZjAFWKfvRXMDE5rLMdVwXHFW",
-	"ip":"http://localhost:8081",
-	"privateKey":"MIGNAgEAMBAGByqGSM49AgEGBSuBBAAKBHYwdAIBAQQgAVe7dsdAg9lfSWkDMIsxzMctulivkqXHhdhP9pl7pyigBwYFK4EEAAqhRANCAATMxJaojG5R3UlfmkBB8fonw5DuCYwmPHEmxmpznib5Cz8G/lmmTOj6EKIE1bDzZ/Om1xIVhmulhKPeA0RYsIXb",
-	"publicKey":"MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEzMSWqIxuUd1JX5pAQfH6J8OQ7gmMJjxxJsZqc54m+Qs/Bv5Zpkzo+hCiBNWw82fzptcSFYZrpYSj3gNEWLCF2w=="
-}

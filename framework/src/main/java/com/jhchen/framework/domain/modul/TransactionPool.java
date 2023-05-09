@@ -18,16 +18,28 @@ import java.util.concurrent.atomic.AtomicReference;
 @AllArgsConstructor
 public class TransactionPool {
     //未分配交易池
-    private Queue<SignedTransaction> transactionList;
+    private List<SignedTransaction> transactionList;
     //已分配交易池
     private List<TransactionPoolItem> allocatedTransactionList;
     //已完成交易池
     private List<TransactionPoolItem> finishedTransactionList;
 
     public TransactionPool(){
-        transactionList = new LinkedList<>();
+        transactionList = new ArrayList<>();
         allocatedTransactionList = new ArrayList<>();
         finishedTransactionList = new ArrayList<>();
+    }
+
+    public TransactionPool(TransactionPool transactionPool){
+        transactionList = new LinkedList<>(transactionPool.getTransactionList());
+        allocatedTransactionList = new ArrayList<>(transactionPool.getAllocatedTransactionList());
+        finishedTransactionList = new ArrayList<>(transactionPool.getFinishedTransactionList());
+    }
+
+    public void copy(TransactionPool transactionPool){
+        this.transactionList = new ArrayList<>(transactionPool.getTransactionList());
+        this.allocatedTransactionList = new ArrayList<>(transactionPool.getAllocatedTransactionList());
+        this.finishedTransactionList = new ArrayList<>(transactionPool.getFinishedTransactionList());
     }
 
     /**
@@ -55,8 +67,12 @@ public class TransactionPool {
         if(num> transactionList.size()){
             num = transactionList.size();
         }
+        Iterator<SignedTransaction> iterator = transactionList.iterator();
+
         for (int i = 0; i < num; i++) {
-            res.add(transactionList.poll());
+            SignedTransaction next = iterator.next();
+            res.add(next);
+            iterator.remove();
         }
         return res;
     }
@@ -67,7 +83,7 @@ public class TransactionPool {
      * @param transaction
      * @param minerAddr
      */
-    public void allocate(SignedTransaction transaction, String minerAddr){
+    public void allocate(SignedTransaction transaction, String minerAddr,Integer height){
         //在未分配中寻找是否有
         Iterator<SignedTransaction> iterator = transactionList.iterator();
         while (iterator.hasNext()){
@@ -76,8 +92,17 @@ public class TransactionPool {
                 iterator.remove();
                 break;
         }
+
+        TransactionPoolItem transactionPoolItem = new TransactionPoolItem(transaction, minerAddr, height);
+        //查看是否已存在
+        Iterator<TransactionPoolItem> iterator1 = allocatedTransactionList.iterator();
+        while (iterator1.hasNext()){
+            TransactionPoolItem next = iterator1.next();
+            if(next.equals(transactionPoolItem))
+                return;
+        }
         //加入已分配
-        allocatedTransactionList.add(new TransactionPoolItem(transaction,minerAddr));
+        allocatedTransactionList.add(transactionPoolItem);
     }
 
 

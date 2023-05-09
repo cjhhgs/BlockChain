@@ -4,6 +4,7 @@ import com.jhchen.framework.domain.modul.Account;
 import com.jhchen.framework.domain.modul.Block;
 import com.jhchen.framework.domain.modul.SignedTransaction;
 import com.jhchen.framework.domain.modul.TransactionPool;
+import io.swagger.models.auth.In;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
@@ -45,5 +46,18 @@ public class CenterBeanInjector {
     }
     @Bean("height")
     private Integer height(){return new Integer(1);}
+    @Bean("idList")
+    private List<String> idList(){
+        List<String> idList = new ArrayList<>();
+        idList.add("0");
+        return idList;
+    }
+
+    @Bean("ackList")
+    private List<Integer> ackList(){
+        List<Integer> ack = new ArrayList<>();
+        ack.add(1);
+        return ack;
+    }
 
 }

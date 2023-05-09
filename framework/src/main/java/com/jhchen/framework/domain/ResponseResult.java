@@ -118,5 +118,12 @@ public class ResponseResult<T> implements Serializable {
     }
 
 
-
+    @Override
+    public String toString() {
+        return "ResponseResult{" +
+                "code=" + code +
+                ", msg='" + msg + '\'' +
+                ", data=" + data +
+                '}';
+    }
 }

@@ -1,6 +1,8 @@
 package com.jhchen.framework.domain.modul;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -12,6 +14,8 @@ import java.util.Date;
  * @since 1.0.0
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TransactionPoolItem {
     private SignedTransaction transaction;
     private String minerAddr;
@@ -20,13 +24,13 @@ public class TransactionPoolItem {
     private Date finishTime;
     private Integer height;
 
-    public TransactionPoolItem(SignedTransaction transaction,String minerAddr){
+    public TransactionPoolItem(SignedTransaction transaction,String minerAddr, Integer height){
         this.transaction = new SignedTransaction(transaction);
         this.minerAddr =minerAddr;
         finished = false;
         allocateTime = new Date();
         finishTime = null;
-        height = -1;
+        this.height = height;
     }
 
     public TransactionPoolItem(TransactionPoolItem transactionPoolItem) {

@@ -1,6 +1,7 @@
 package com.jhchen.mine.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jhchen.framework.domain.AppHttpCodeEnum;
 import com.jhchen.framework.domain.ResponseResult;
@@ -22,12 +23,12 @@ import java.util.Map;
 public class MineService {
     @Value("${centerAddr}")
     private String centerAddr;
+    @Value("${accountPath}")
+    private String accountPath;
     @Autowired
     @Qualifier("accountList")
     List<Account> accountList;
 
-    @Value("${accountPath}")
-    private String accountPath;
     @Autowired
     Account account;
     @Autowired
@@ -43,7 +44,14 @@ public class MineService {
         if(account.equals(null)){
             return;
         }
-        JSONUtil.createJsonFile(account,accountPath);
+        File directory = new File("./mine/"+accountPath);
+        try {
+            String path = directory.getCanonicalPath();
+            JSONUtil.createJsonFile(account,path);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -51,13 +59,15 @@ public class MineService {
      */
     public void loadAccount(){
         Account a = null;
+        File directory = new File("./mine/"+accountPath);
         try {
-            a = JSONUtil.loadJSONObject(accountPath,Account.class);
+            String path = directory.getCanonicalPath();
+            a = JSONUtil.loadJSONObject(path,Account.class);
 
         }catch (Exception e){
             e.printStackTrace();
         }
-        if (!a.equals(null)){
+        if (a != null){
             account.setPublicKey(a.getPublicKey());
             account.setPrivateKey(a.getPrivateKey());
             account.setAddr(a.getAddr());
@@ -73,8 +83,22 @@ public class MineService {
         Account a = new Account();
         a.setAddr(account.getAddr());
         a.setIp(account.getIp());
+        System.out.println(accountList);
         try {
             HttpUtil.broadcastMessage("/register",JSON.toJSONString(a),accountList);
+            return ResponseResult.okResult();
+        } catch (IOException e) {
+            return ResponseResult.errorResult(AppHttpCodeEnum.HTTP_ERROR);
+        }
+    }
+
+    /**
+     * 向中心申请入对
+     * @return
+     */
+    public ResponseResult inQueue(){
+        try {
+            HttpUtil.post(centerAddr+"/queue",JSON.toJSONString(account));
             return ResponseResult.okResult();
         } catch (IOException e) {
             return ResponseResult.errorResult(AppHttpCodeEnum.HTTP_ERROR);
@@ -94,15 +118,31 @@ public class MineService {
         Map<Integer,List<SignedTransaction>> map = mineTransactionService.getTrans();
 
         //获取前区块头hash
+        List<String> idList = getIdList();
         Integer target = Integer.valueOf(targetBits);
         int size = blockChain.size();
         Block last = blockChain.get(size-1);
         //开始构建
-        for (Integer key : map.keySet()) {
-            List<SignedTransaction> transactionList = map.get(key);
-            Block block = blockGenerateService.generateBlock(transactionList, last.getId(), target, key);
+        for (Integer height : map.keySet()) {
+            //查看是否已经挖过
+            if(blockChain.size()>height && blockChain.get(height)!=null){
+                return ResponseResult.okResult();
+            }
+            //body
+            List<SignedTransaction> transactionList = map.get(height);
+            //preId
+            if(idList.size()<height)
+                return ResponseResult.errorResult(AppHttpCodeEnum.HTTP_ERROR);
+            String preId = idList.get(height-1);
+            //generate
+            Block block = blockGenerateService.generateBlock(transactionList, preId, target, height);
+            block.setMinerAddr(account.getAddr());
+
             //添加到本地
-            blockChain.add(block);
+            while(blockChain.size()<block.getHeight()+1){
+                blockChain.add(null);
+            }
+            blockChain.set(block.getHeight(),block);
             //广播
             try {
                 HttpUtil.broadcastMessage("/addBlock",JSON.toJSONString(block), accountList);
@@ -138,7 +178,22 @@ public class MineService {
         System.out.println("blockChain:"+blockChain);
 
         return ResponseResult.okResult(blockChain);
+    }
 
+    /**
+     * 请求id列表
+     * @return
+     */
+    private List<String> getIdList(){
+        try {
+            String s = HttpUtil.get(centerAddr+"/getIdList");
+            ResponseResult<List<String>> res = new ResponseResult<>();
+            ResponseResult<List<String>> responseResult = JSON.parseObject(s, res.getClass());
+            List<String> idList = responseResult.getData();
+            return idList;
+        } catch (IOException e) {
+            return null;
+        }
 
     }
 
@@ -150,10 +205,11 @@ public class MineService {
     public ResponseResult getTransactions(){
         try {
             String s = HttpUtil.get(centerAddr + "/showTransactions");
-            JSONObject object = JSONObject.parseObject(s);
-            System.out.println(object);
-            TransactionPool data = JSON.parseObject(object.getString("data"), TransactionPool.class);
-            transactionPool = data;
+            ResponseResult<TransactionPool> o = new ResponseResult<TransactionPool>();
+            ResponseResult responseResult = JSON.parseObject(s, o.getClass());
+            TransactionPool object = JSON.parseObject(responseResult.getData().toString(), TransactionPool.class);
+            transactionPool.copy(object);
+            System.out.println(transactionPool);
             return ResponseResult.okResult(transactionPool);
         } catch (IOException e) {
             return ResponseResult.errorResult(AppHttpCodeEnum.HTTP_ERROR);

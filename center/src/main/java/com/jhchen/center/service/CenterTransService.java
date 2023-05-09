@@ -7,14 +7,17 @@ import com.jhchen.framework.domain.modul.Account;
 import com.jhchen.framework.domain.modul.SignedTransaction;
 import com.jhchen.framework.domain.modul.TransactionPool;
 import com.jhchen.framework.domain.modul.TransactionPoolItem;
+import com.jhchen.framework.service.Block.BlockGenerateService;
 import com.jhchen.framework.service.TransactionService;
 import com.jhchen.framework.utils.HttpUtil;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
 import java.util.Queue;
 import java.util.stream.Collectors;
@@ -39,7 +42,12 @@ public class CenterTransService {
     @Autowired
     private TransactionService transactionService;
     @Autowired
+    private BlockGenerateService blockGenerateService;
+    @Autowired
     private Integer height;
+    @Autowired
+    @Qualifier("idList")
+    private List<String> idList;
 
     /**
      * 添加新的交易记录
@@ -77,22 +85,32 @@ public class CenterTransService {
     public ResponseResult allocate(){
         //获取队列中第一个账户
         Account tarAccount = waitList.poll();
+        if(tarAccount==null){
+            return ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR);
+        }
         //取出未分配的交易，默认2条
         List<SignedTransaction> unallocated = transactionPool.getUnallocated(2);
+        //计算id
+        String merkle = blockGenerateService.generateHash(unallocated);
+        String preID = idList.get(height-1);
+        String id = DigestUtils.sha256Hex(preID + merkle);
+        idList.add(id);
+
         // 包装成已分配交易
         List<TransactionPoolItem> collect = unallocated.stream().map(i -> {
-            TransactionPoolItem transactionPoolItem = new TransactionPoolItem(i, tarAccount.getAddr());
+            TransactionPoolItem transactionPoolItem = new TransactionPoolItem(i, tarAccount.getAddr(),height);
             //设置层数
+            System.out.println(height);
             transactionPoolItem.setHeight(height);
             return transactionPoolItem;
         }).collect(Collectors.toList());
-        height++;
+        unallocated.stream().forEach(i -> transactionPool.allocate(i, tarAccount.getAddr(),height));
         try {
             HttpUtil.broadcastMessage("/alloc", JSON.toJSONString(collect),accountList);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        unallocated.stream().forEach(i -> transactionPool.allocate(i, tarAccount.getAddr()));
+        height++;
         return ResponseResult.okResult();
     }
 

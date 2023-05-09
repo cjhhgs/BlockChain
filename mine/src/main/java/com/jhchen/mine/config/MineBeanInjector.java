@@ -30,9 +30,15 @@ public class MineBeanInjector {
     @Bean("transactionPool")//交易池
     public TransactionPool transactionPool(){return new TransactionPool();}
 
+    @Value("${server.port}")
+    String port;
+
     @Bean("account")//本地账户
     public Account userAccount(){
-        return new Account();
+        Account account = new Account();
+        account.setIp("http://localhost:"+port);
+        return account;
+
     }
 
     @Bean("accountList")//网络所有节点
