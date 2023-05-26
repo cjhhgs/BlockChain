@@ -70,6 +70,15 @@ public class MineTransactionController {
     @ApiOperation(value = "交易分配指令")
     @ApiParam(name = "transactionPoolItemList")
     public ResponseResult alloc(@RequestBody List<TransactionPoolItem> transactionPoolItemList){
-        return mineTransactionService.alloc(transactionPoolItemList);
+        ResponseResult res = mineTransactionService.alloc(transactionPoolItemList);
+        mineService.mine();
+        return res;
     }
+
+    @PostMapping("/finishBlock")
+    public ResponseResult finishBlock(@RequestBody Block block){
+        return mineService.finishBlock(block);
+    }
+
+
 }

@@ -18,9 +18,9 @@ import java.util.concurrent.atomic.AtomicReference;
 @AllArgsConstructor
 public class TransactionPool {
     //未分配交易池
-    private List<SignedTransaction> transactionList;
+    public List<SignedTransaction> transactionList;
     //已分配交易池
-    private List<TransactionPoolItem> allocatedTransactionList;
+    public List<TransactionPoolItem> allocatedTransactionList;
     //已完成交易池
     private List<TransactionPoolItem> finishedTransactionList;
 

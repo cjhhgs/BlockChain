@@ -57,11 +57,6 @@ public class Block {
 
     }
 
-    public void finish(){
-        body.stream().forEach((item)->{
-            //item.setFinished(true);
-        });
-    }
     public static Block genesisBlock(){
         Block block = new Block();
         block.setId("0");

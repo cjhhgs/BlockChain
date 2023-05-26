@@ -73,7 +73,7 @@ public class BlockVerifyService {
         }
         System.out.println("验证body正确");
         //将交易移入已完成列表
-        finishTrans(body,new Date(),transactionPool);
+        //finishTrans(body,new Date(),transactionPool);
         //添加区块到指定位置
         while(blockChain.size()<block.getHeight()+1){
             blockChain.add(null);

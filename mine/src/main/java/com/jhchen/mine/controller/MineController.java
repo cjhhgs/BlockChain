@@ -11,9 +11,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -69,7 +69,7 @@ public class MineController {
     @GetMapping("/registerToOther")
     @ApiOperation(value = "向所有节点注册")
     public ResponseResult registerToOther(){
-        return mineService.register();
+        return mineService.registerToOther();
     }
 
     @GetMapping("/inQueue")
@@ -80,9 +80,8 @@ public class MineController {
 
     @PostMapping("/register")
     @ApiOperation(value = "接受节点网络注册")
-    public ResponseResult register(){
-        accountList.add(account);
-        return ResponseResult.okResult();
+    public ResponseResult register(@RequestBody Account account){
+        return mineService.register(account);
     }
 
     @GetMapping("/showBlockChain")
@@ -100,6 +99,17 @@ public class MineController {
     public ResponseResult mine(){
         return mineService.mine();
     }
+
+    @PostMapping("/addBlock")
+    public ResponseResult addBlock(@RequestBody Block block){
+        return mineService.addBlock(block);
+    }
+
+    @GetMapping("/showAccountList")
+    public ResponseResult showAccountList(){
+        return ResponseResult.okResult(accountList);
+    }
+
 
 
 
