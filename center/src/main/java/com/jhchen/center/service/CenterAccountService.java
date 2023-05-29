@@ -44,6 +44,7 @@ public class CenterAccountService {
         List<Account> collect = accountList.stream().filter(i -> i.getAddr().equals(account.getAddr())).collect(Collectors.toList());
         if(collect.isEmpty()){
             accountList.add(account);
+
             return ResponseResult.okResult();
         }
         return ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR);

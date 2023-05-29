@@ -3,6 +3,7 @@ package com.jhchen.mine.runner;
 import com.alibaba.fastjson.JSON;
 import com.jhchen.framework.domain.modul.Account;
 import com.jhchen.framework.domain.modul.Block;
+import com.jhchen.mine.controller.MineController;
 import com.jhchen.mine.service.MineService;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ public class MineBlockChainRunner implements CommandLineRunner {
     private List<Block> blockChain;
     @Autowired
     MineService mineService;
+    @Autowired
+    MineController mineController;
     @Autowired
     Account account;
     @Autowired
@@ -37,7 +40,9 @@ public class MineBlockChainRunner implements CommandLineRunner {
         System.out.println("获取区块链");
         mineService.getBlockChainFromCenter();
         System.out.println("加载中央节点ip");
-        accountList.add(new Account(null,null,null,centerAddr));
+        accountList.add(new Account("center",null,null,centerAddr));
+        mineController.registerToOther();
+        mineController.inQueue();
         System.out.println("finish init");
 
     }

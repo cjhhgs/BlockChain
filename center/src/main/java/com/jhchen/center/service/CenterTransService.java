@@ -90,6 +90,10 @@ public class CenterTransService {
         }
         //取出未分配的交易，默认2条
         List<SignedTransaction> unallocated = transactionPool.getUnallocated(2);
+        if(unallocated.size()==0){
+            return ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR);
+        }
+
         //计算id
         String merkle = blockGenerateService.generateHash(unallocated);
         String preID = idList.get(height-1);

@@ -5,6 +5,7 @@ import com.jhchen.framework.domain.ResponseResult;
 import com.jhchen.framework.domain.modul.*;
 import com.jhchen.framework.service.TransactionService;
 import com.jhchen.framework.utils.HttpUtil;
+import com.jhchen.mine.controller.MineController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;

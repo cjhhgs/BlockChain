@@ -1,23 +1,27 @@
 package com.jhchen.mine.service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jhchen.framework.domain.AppHttpCodeEnum;
 import com.jhchen.framework.domain.ResponseResult;
 import com.jhchen.framework.domain.modul.*;
+import com.jhchen.framework.domain.vo.CheckBlockVo;
 import com.jhchen.framework.service.Block.BlockGenerateService;
+import com.jhchen.framework.service.Block.BlockVerifyService;
+import com.jhchen.framework.service.ECCService;
 import com.jhchen.framework.utils.HttpUtil;
 import com.jhchen.mine.utils.JSONUtil;
-import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class MineService {
@@ -37,6 +41,10 @@ public class MineService {
     public TransactionPool transactionPool;
     @Autowired
     public BlockGenerateService blockGenerateService;
+    @Autowired
+    public BlockVerifyService blockVerifyService;
+    @Autowired
+    private ECCService eccService;
     @Autowired
     public MineTransactionService mineTransactionService;
 
@@ -79,11 +87,14 @@ public class MineService {
     /**
      * 向其他节点注册
      */
-    public ResponseResult register(){
+    public ResponseResult registerToOther(){
+        getAccountList();
+
         Account a = new Account();
         a.setAddr(account.getAddr());
         a.setIp(account.getIp());
         System.out.println(accountList);
+
         try {
             HttpUtil.broadcastMessage("/register",JSON.toJSONString(a),accountList);
             return ResponseResult.okResult();
@@ -113,6 +124,7 @@ public class MineService {
      * 挖矿
      * @return
      */
+    @Async
     public ResponseResult mine(){
         //获取分配给自己的交易
         Map<Integer,List<SignedTransaction>> map = mineTransactionService.getTrans();
@@ -126,7 +138,7 @@ public class MineService {
         for (Integer height : map.keySet()) {
             //查看是否已经挖过
             if(blockChain.size()>height && blockChain.get(height)!=null){
-                return ResponseResult.okResult();
+                continue;
             }
             //body
             List<SignedTransaction> transactionList = map.get(height);
@@ -150,8 +162,34 @@ public class MineService {
                 return ResponseResult.errorResult(AppHttpCodeEnum.HTTP_ERROR);
             }
         }
-        return ResponseResult.okResult();
+        inQueue();
+        return ResponseResult.okResult(blockChain);
     }
+
+    /**
+     * 添加区块
+     * @param block
+     * @return
+     */
+    public ResponseResult addBlock(Block block){
+        //验证
+        if(!(blockVerifyService.addBlock(block,targetBits,blockChain,transactionPool).getCode()==200)){
+            return ResponseResult.errorResult(AppHttpCodeEnum.BLOCK_NOT_VERIFIED);
+        }
+        //ack
+        try {
+            String sign = eccService.eccSign(account.getPrivateKey(),block.toString());
+            CheckBlockVo checkBlockVo = new CheckBlockVo();
+            checkBlockVo.setBlock(block);
+            checkBlockVo.setSign(sign);
+            checkBlockVo.setAccount(account);
+            HttpUtil.post(centerAddr+"/checkBlock",JSON.toJSONString(checkBlockVo));
+            return ResponseResult.okResult();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     /**
      * 从中心获取区块链副本
@@ -216,6 +254,49 @@ public class MineService {
         }
     }
 
+    /**
+     * 从中心获取账户列表
+     */
+    public void getAccountList(){
+        try{
+            String s = HttpUtil.get(centerAddr + "/showAccount");
+            ResponseResult<List<Account>> o = new ResponseResult<>();
+            ResponseResult responseResult = JSON.parseObject(s, o.getClass());
+            List<Account> al = JSON.parseArray(responseResult.getData().toString(), Account.class);
+            // 筛选出al中有而accountList中没有的account
+            al.removeAll(accountList);
+            accountList.addAll(al);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 接受其他节点的注册
+     * @param account1
+     * @return
+     */
+    public ResponseResult register(Account account1){
+        if(account1==null || account1.getAddr()==null)
+            return ResponseResult.errorResult(AppHttpCodeEnum.HTTP_ERROR);
+
+        if(account.getAddr().equals(account1.getAddr())){
+            return ResponseResult.okResult();
+        }
+
+        List<Account> collect = accountList.stream().filter(i -> i.getAddr().equals(account1.getAddr())).collect(Collectors.toList());
+        if(collect.isEmpty()){
+            accountList.add(account1);
+
+            return ResponseResult.okResult();
+        }
+        return ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR);
+    }
+
+    public ResponseResult finishBlock(Block block){
+        blockVerifyService.finishTrans(block.getBody(),new Date(),transactionPool);
+        return ResponseResult.okResult();
+    }
 
 
 
