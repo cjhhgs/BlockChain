@@ -71,7 +71,7 @@ public class Task {
 
         if(ackList.get(block.getHeight())==null){
             System.out.println("区块"+block.getHeight()+"未收到ack");
-        } else if (ackList.get(block.getHeight()) < accountList.size()/2) {
+        } else if (ackList.get(block.getHeight()) < accountList.size()/2-1) {
         } else {
             System.out.println("区块"+block.getHeight()+"收到ack数足够"+df.format(new Date()));
             centerBlockChainService.finishBlock(block,new Date());

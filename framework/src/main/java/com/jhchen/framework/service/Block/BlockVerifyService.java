@@ -54,16 +54,19 @@ public class BlockVerifyService {
         int blockTargetBits = block.getTargetBits();
         //是否满足难度要求
         if(blockTargetBits<target){
+            System.out.println("难度不对");
             return ResponseResult.errorResult(AppHttpCodeEnum.BLOCK_NOT_VERIFIED);
         }
         //验证格式是否正确
         Boolean v =verifyBlock(block);
         if(v==false){
+            System.out.println("格式不对");
             return ResponseResult.errorResult(AppHttpCodeEnum.BLOCK_NOT_VERIFIED);
         }
         //验证包含的交易信息是否正确
         List<SignedTransaction> body = block.getBody();
         if(verifyBlockBody(body,block.getMinerAddr(),transactionPool,block.getHeight())==false){
+            System.out.println("交易信息不正确");
             return ResponseResult.errorResult(AppHttpCodeEnum.BLOCK_NOT_VERIFIED);
         }
         //将交易移入已完成列表

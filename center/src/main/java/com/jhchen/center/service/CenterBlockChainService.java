@@ -54,12 +54,15 @@ public class CenterBlockChainService {
      */
     public ResponseResult addBlock(Block block){
         ResponseResult responseResult = blockVerifyService.addBlock(block, targetBits, blockChain, transactionPool);
-        if(responseResult.getCode()==AppHttpCodeEnum.SUCCESS.getCode()){
-            while(ackList.size()<block.getHeight()+1){
-                ackList.add(0);
+        synchronized (ackList){
+            if(responseResult.getCode()==AppHttpCodeEnum.SUCCESS.getCode()){
+                while(ackList.size()<block.getHeight()+1){
+                    ackList.add(0);
+                }
+                ackList.set(block.getHeight(),1);
             }
-            ackList.set(block.getHeight(),1);
         }
+
         return responseResult;
     }
 
@@ -86,7 +89,10 @@ public class CenterBlockChainService {
             return ResponseResult.errorResult(AppHttpCodeEnum.SIGN_NOT_VERIFY);
 
         //ack+1
-        ackList.set(block.getHeight(), ackList.get(block.getHeight())+1);
+        synchronized (ackList){
+            ackList.set(block.getHeight(), ackList.get(block.getHeight())+1);
+        }
+
         return null;
     }
 

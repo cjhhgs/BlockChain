@@ -156,13 +156,16 @@ public class MineService {
             }
             blockChain.set(block.getHeight(),block);
             //广播
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
             try {
-                Thread.sleep(500);
+
                 HttpUtil.broadcastMessage("/addBlock",JSON.toJSONString(block), accountList);
             } catch (IOException e) {
                 return ResponseResult.errorResult(AppHttpCodeEnum.HTTP_ERROR);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
             }
         }
         // inQueue();
@@ -177,6 +180,7 @@ public class MineService {
     public ResponseResult addBlock(Block block){
         //验证
         if(!(blockVerifyService.addBlock(block,targetBits,blockChain,transactionPool).getCode()==200)){
+            System.out.println("区块"+block.getHeight()+"校验未通过");
             return ResponseResult.errorResult(AppHttpCodeEnum.BLOCK_NOT_VERIFIED);
         }
         //ack
