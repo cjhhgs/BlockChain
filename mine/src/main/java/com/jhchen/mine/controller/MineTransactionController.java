@@ -55,15 +55,27 @@ public class MineTransactionController {
     @PostMapping("/createTransaction")
     @ApiOperation(value = "创建交易")
     @ApiParam(name = "transaction")
-    public ResponseResult createTransaction(@RequestBody Transaction transaction){
+    public ResponseResult createTransactionBatch(@RequestBody Transaction transaction ){
+
         return mineTransactionService.buildTransaction(transaction);
+    }
+
+    @PostMapping("/createTransactionBatch")
+    @ApiOperation(value = "批量创建交易")
+    public ResponseResult createTransaction(@RequestBody CreateTransBatchVo createTransBatchVo){
+        return mineTransactionService.createTransBatch(createTransBatchVo);
     }
 
     @PostMapping("/addTransaction")
     @ApiOperation(value = "接受一个新交易")
-    @ApiParam(name = "transaction")
     public ResponseResult addTransaction(@RequestBody SignedTransaction signedTransaction){
         return mineTransactionService.addTransaction(signedTransaction);
+    }
+
+    @PostMapping("/addTransBatch")
+    @ApiOperation(value = "批量添加新交易")
+    public ResponseResult addTransBatch(@RequestBody List<SignedTransaction> signedTransactionList){
+        return mineTransactionService.addTransBatch(signedTransactionList);
     }
 
     @PostMapping("/alloc")

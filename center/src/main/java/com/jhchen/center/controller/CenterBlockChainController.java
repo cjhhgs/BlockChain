@@ -55,7 +55,7 @@ public class CenterBlockChainController {
     @PostMapping("/checkBlock")
     public ResponseResult checkBlock(@RequestBody CheckBlockVo checkBlockVo){
         ResponseResult responseResult = centerBlockChainService.checkBlock(checkBlockVo);
-        task.execute();
+        task.execute(checkBlockVo.getBlock());
         return responseResult;
     }
 

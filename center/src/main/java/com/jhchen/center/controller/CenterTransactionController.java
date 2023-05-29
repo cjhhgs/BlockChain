@@ -30,6 +30,12 @@ public class CenterTransactionController {
         return centerTransService.addTransaction(transaction);
     }
 
+    @PostMapping("/addTransBatch")
+    @ApiOperation(value = "接收一个新的交易")
+    public ResponseResult addTransBatch(@RequestBody List<SignedTransaction> signedTransactionList){
+        return centerTransService.addTransBatch(signedTransactionList);
+    }
+
     @GetMapping("/showTransactions")
     @ApiOperation(value = "显示交易列表")
     public ResponseResult showTransactions(){

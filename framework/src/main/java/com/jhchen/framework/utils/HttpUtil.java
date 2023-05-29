@@ -2,6 +2,7 @@ package com.jhchen.framework.utils;
 
 import com.jhchen.framework.domain.modul.Account;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
@@ -27,6 +28,7 @@ public class HttpUtil {
         HttpClient httpClient = HttpClientBuilder.create().build();
 //        2、创建请求方式的实例
         HttpPost httpPost = new HttpPost(url);
+        httpPost.setProtocolVersion(HttpVersion.HTTP_1_0);
 //        3、添加请求参数(设置请求和传输超时时间)
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(60000).setConnectTimeout(60000).build();
         httpPost.setConfig(requestConfig);
@@ -54,6 +56,7 @@ public class HttpUtil {
     public static String get(String url) throws IOException{
         HttpClient httpClient = HttpClientBuilder.create().build();
         HttpGet httpGet = new HttpGet(url);
+        httpGet.setProtocolVersion(HttpVersion.HTTP_1_0);
         HttpResponse response = httpClient.execute(httpGet);
         String result = null;
         int statusCode = response.getStatusLine().getStatusCode();

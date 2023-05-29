@@ -50,7 +50,6 @@ public class BlockVerifyService {
      */
     public ResponseResult addBlock(Block block, String targetBits, List<Block> blockChain, TransactionPool transactionPool){
         Integer target = Integer.valueOf(targetBits);
-        System.out.println("block:"+ JSON.toJSONString(block));
 
         int blockTargetBits = block.getTargetBits();
         //是否满足难度要求
@@ -59,19 +58,14 @@ public class BlockVerifyService {
         }
         //验证格式是否正确
         Boolean v =verifyBlock(block);
-        System.out.println("开始验证head");
-        System.out.println(v);
         if(v==false){
             return ResponseResult.errorResult(AppHttpCodeEnum.BLOCK_NOT_VERIFIED);
         }
-        System.out.println("验证head正确");
         //验证包含的交易信息是否正确
         List<SignedTransaction> body = block.getBody();
-        System.out.println("开始验证body");
         if(verifyBlockBody(body,block.getMinerAddr(),transactionPool,block.getHeight())==false){
             return ResponseResult.errorResult(AppHttpCodeEnum.BLOCK_NOT_VERIFIED);
         }
-        System.out.println("验证body正确");
         //将交易移入已完成列表
         //finishTrans(body,new Date(),transactionPool);
         //添加区块到指定位置

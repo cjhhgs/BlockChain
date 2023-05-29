@@ -1,5 +1,5 @@
 centerAddr: http://localhost:1000
 accountPath: account2.txt
-targetBits: 22
+targetBits: 2
 server:
   port: 8082

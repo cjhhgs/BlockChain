@@ -67,7 +67,6 @@ public class CenterBlockChainService {
         blockVerifyService.finishTrans(block.getBody(),date,transactionPool);
         try {
             HttpUtil.broadcastMessage("/finishBlock", JSON.toJSONString(block),accountList);
-            System.out.println("finishBlock success");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

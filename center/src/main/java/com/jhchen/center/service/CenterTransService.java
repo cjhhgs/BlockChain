@@ -59,12 +59,12 @@ public class CenterTransService {
             return ResponseResult.errorResult(AppHttpCodeEnum.SIGN_NOT_VERIFY);
         }
         transactionPool.add(transaction);
-        try {
-            HttpUtil.broadcastMessage("/addTransaction",JSON.toJSONString(transaction),accountList);
-        } catch (IOException e) {
-            return ResponseResult.errorResult(AppHttpCodeEnum.HTTP_ERROR);
-        }
-        announceTrans();
+        //announceTrans();
+        return ResponseResult.okResult();
+    }
+
+    public ResponseResult addTransBatch(List<SignedTransaction> signedTransactionList){
+        transactionPool.addBatch(signedTransactionList);
         return ResponseResult.okResult();
     }
 
@@ -82,14 +82,17 @@ public class CenterTransService {
     /**
      * 分配并广播消息
      */
+
     public ResponseResult allocate(){
         //获取队列中第一个账户
         Account tarAccount = waitList.poll();
         if(tarAccount==null){
             return ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR);
         }
-        //取出未分配的交易，默认2条
-        List<SignedTransaction> unallocated = transactionPool.getUnallocated(2);
+        waitList.add(tarAccount);
+
+        //取出未分配的交易，默认1条
+        List<SignedTransaction> unallocated = transactionPool.getUnallocated(10);
         if(unallocated.size()==0){
             return ResponseResult.errorResult(AppHttpCodeEnum.SYSTEM_ERROR);
         }
@@ -104,7 +107,6 @@ public class CenterTransService {
         List<TransactionPoolItem> collect = unallocated.stream().map(i -> {
             TransactionPoolItem transactionPoolItem = new TransactionPoolItem(i, tarAccount.getAddr(),height);
             //设置层数
-            System.out.println(height);
             transactionPoolItem.setHeight(height);
             return transactionPoolItem;
         }).collect(Collectors.toList());

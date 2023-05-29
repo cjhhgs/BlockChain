@@ -3,6 +3,7 @@ package com.jhchen.framework.domain.modul;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Synchronized;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -53,7 +54,17 @@ public class TransactionPool {
                 flag.set(false);
         });
         if(flag.get()==true)
-            transactionList.add(transaction);
+            synchronized (transactionList){
+                transactionList.add(transaction);
+            }
+
+    }
+
+    public void addBatch(List<SignedTransaction> signedTransactionList){
+        synchronized (transactionList){
+            transactionList.addAll(signedTransactionList);
+        }
+
     }
 
 
@@ -64,16 +75,18 @@ public class TransactionPool {
      */
     public List<SignedTransaction> getUnallocated(Integer num){
         List<SignedTransaction> res = new ArrayList<>();
-        if(num> transactionList.size()){
-            num = transactionList.size();
-        }
-        Iterator<SignedTransaction> iterator = transactionList.iterator();
+        synchronized (transactionList){
+            if(num> transactionList.size()){
+                num = transactionList.size();
+            }
+            for (int i = 0; i < num; i++) {
+                SignedTransaction next = transactionList.get(0);
+                res.add(next);
+                transactionList.remove(0);
 
-        for (int i = 0; i < num; i++) {
-            SignedTransaction next = iterator.next();
-            res.add(next);
-            iterator.remove();
+            }
         }
+
         return res;
     }
 
@@ -85,24 +98,33 @@ public class TransactionPool {
      */
     public void allocate(SignedTransaction transaction, String minerAddr,Integer height){
         //在未分配中寻找是否有
-        Iterator<SignedTransaction> iterator = transactionList.iterator();
-        while (iterator.hasNext()){
-            SignedTransaction next = iterator.next();
-            if(next.equals(transaction))
-                iterator.remove();
+        for (int i = 0; i < transactionList.size(); i++) {
+            SignedTransaction signedTransaction = transactionList.get(i);
+            if (signedTransaction.equals(transaction)){
+                synchronized (transactionList){
+                    transactionList.remove(i);
+                }
                 break;
+            }
+
         }
+
 
         TransactionPoolItem transactionPoolItem = new TransactionPoolItem(transaction, minerAddr, height);
         //查看是否已存在
-        Iterator<TransactionPoolItem> iterator1 = allocatedTransactionList.iterator();
-        while (iterator1.hasNext()){
-            TransactionPoolItem next = iterator1.next();
-            if(next.equals(transactionPoolItem))
+        for (int i = 0; i < allocatedTransactionList.size(); i++) {
+            TransactionPoolItem transactionPoolItem1 = allocatedTransactionList.get(i);
+            if(transactionPoolItem1.equals(transactionPoolItem))
                 return;
         }
+
         //加入已分配
-        allocatedTransactionList.add(transactionPoolItem);
+        synchronized (allocatedTransactionList){
+            allocatedTransactionList.add(transactionPoolItem);
+        }
+
+
+
     }
 
 
@@ -113,9 +135,8 @@ public class TransactionPool {
      * @return
      */
     public boolean find(SignedTransaction transaction,String minerAddr, Integer height){
-        Iterator<TransactionPoolItem> iterator = allocatedTransactionList.iterator();
-        while (iterator.hasNext()){
-            TransactionPoolItem transactionPoolItem = iterator.next();
+        for (int i = 0; i < allocatedTransactionList.size(); i++) {
+            TransactionPoolItem transactionPoolItem = allocatedTransactionList.get(i);
             if(transactionPoolItem.equals(transaction)
                     && transactionPoolItem.getMinerAddr().equals(minerAddr)
                     &&transactionPoolItem.getHeight().equals(height)){
@@ -123,7 +144,20 @@ public class TransactionPool {
             }
         }
         return false;
+//        synchronized (allocatedTransactionList){
+//            for (TransactionPoolItem transactionPoolItem : allocatedTransactionList) {
+//                if(transactionPoolItem.equals(transaction)
+//                        && transactionPoolItem.getMinerAddr().equals(minerAddr)
+//                        &&transactionPoolItem.getHeight().equals(height)){
+//                    return true;
+//                }
+//            }
+//            return false;
+//        }
+
     }
+
+
 
 
     /**
@@ -132,18 +166,45 @@ public class TransactionPool {
      * @return
      */
     public boolean finish(SignedTransaction transaction,Date finishTime){
-        Iterator<TransactionPoolItem> iterator = allocatedTransactionList.iterator();
-        while(iterator.hasNext()){
-            TransactionPoolItem transactionPoolItem = iterator.next();
+        for (int i = 0; i < allocatedTransactionList.size(); i++) {
+            TransactionPoolItem transactionPoolItem = allocatedTransactionList.get(i);
             if(transactionPoolItem.equals(transaction)){
                 transactionPoolItem.setFinished(true);
                 transactionPoolItem.setFinishTime(finishTime);
-                iterator.remove();
-                finishedTransactionList.add(transactionPoolItem);
+                synchronized (allocatedTransactionList){
+                    allocatedTransactionList.remove(i);
+                }
+                synchronized (finishedTransactionList){
+                    finishedTransactionList.add(transactionPoolItem);
+                }
                 return true;
             }
         }
+//        synchronized (this){
+//            for (TransactionPoolItem transactionPoolItem : allocatedTransactionList) {
+//                if(transactionPoolItem.equals(transaction)){
+//
+//                    transactionPoolItem.setFinished(true);
+//                    transactionPoolItem.setFinishTime(finishTime);
+//                    allocatedTransactionList.remove(transactionPoolItem);
+//                    finishedTransactionList.add(transactionPoolItem);
+//                    return true;
+//                }
+//            }
+//        }
         return false;
+//        Iterator<TransactionPoolItem> iterator = allocatedTransactionList.iterator();
+//        while(iterator.hasNext()){
+//            TransactionPoolItem transactionPoolItem = iterator.next();
+//            if(transactionPoolItem.equals(transaction)){
+//                transactionPoolItem.setFinished(true);
+//                transactionPoolItem.setFinishTime(finishTime);
+//                iterator.remove();
+//                finishedTransactionList.add(transactionPoolItem);
+//                return true;
+//            }
+//        }
+//        return false;
     }
 }
 

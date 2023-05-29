@@ -5,6 +5,7 @@ import com.jhchen.framework.domain.ResponseResult;
 import com.jhchen.framework.domain.modul.*;
 import com.jhchen.framework.service.TransactionService;
 import com.jhchen.framework.utils.HttpUtil;
+import com.jhchen.mine.controller.CreateTransBatchVo;
 import com.jhchen.mine.controller.MineController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,7 +42,6 @@ public class MineTransactionService {
      * @return
      */
     public ResponseResult buildTransaction(Transaction transaction){
-        System.out.println(transaction);
         //签名
         SignedTransaction signedTransaction = transactionService.signTransaction(transaction, account);
         //添加到未分配队列
@@ -53,6 +53,37 @@ public class MineTransactionService {
             throw new RuntimeException(e);
         }
         return ResponseResult.okResult(signedTransaction);
+    }
+
+    /**
+     * 批量创建交易
+     */
+    public ResponseResult createTransBatch(CreateTransBatchVo createTransBatchVo){
+        Transaction transaction = createTransBatchVo.getTransaction();
+        List<SignedTransaction> res = new ArrayList<>();
+        for (int i = 0;i<createTransBatchVo.getCount();i++){
+            SignedTransaction signedTransaction = transactionService.signTransaction(transaction, account);
+            res.add(signedTransaction);
+            transactionPool.add(signedTransaction);
+        }
+        //广播
+        try {
+            HttpUtil.broadcastMessage("/addTransBatch",JSON.toJSONString(res),accountList);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return ResponseResult.okResult();
+
+    }
+
+    /**
+     * 批量添加新交易
+     * @param signedTransactionList
+     * @return
+     */
+    public ResponseResult addTransBatch(List<SignedTransaction> signedTransactionList){
+        transactionPool.addBatch(signedTransactionList);
+        return ResponseResult.okResult();
     }
 
     /**

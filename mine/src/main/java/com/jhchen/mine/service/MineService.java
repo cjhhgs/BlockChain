@@ -157,12 +157,15 @@ public class MineService {
             blockChain.set(block.getHeight(),block);
             //广播
             try {
+                Thread.sleep(500);
                 HttpUtil.broadcastMessage("/addBlock",JSON.toJSONString(block), accountList);
             } catch (IOException e) {
                 return ResponseResult.errorResult(AppHttpCodeEnum.HTTP_ERROR);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         }
-        inQueue();
+        // inQueue();
         return ResponseResult.okResult(blockChain);
     }
 

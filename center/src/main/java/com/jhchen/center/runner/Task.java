@@ -51,7 +51,8 @@ public class Task {
         System.out.println("检测区块ack情况 " + df.format(new Date()));
 
         for (Block block : blockChain) {
-            if(block.getHeight()==null||block.getHeight()==0){
+
+            if(block==null||block.getHeight()==0){
                 continue;
             }
 
@@ -65,34 +66,28 @@ public class Task {
         }
     }
 
-    public void execute(){
+    public void execute(Block block){
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //设置日期格式
-        System.out.println("检测区块ack情况 " + df.format(new Date()));
 
-        for (Block block : blockChain) {
-            if(block.getHeight()==null || block.getHeight()==0){
-                continue;
-            }
-
-            if(ackList.get(block.getHeight())==null){
-                System.out.println("区块"+block.getHeight()+"未收到ack");
-            } else if (ackList.get(block.getHeight()) < accountList.size()/2) {
-                System.out.println("区块"+block.getHeight()+"收到ack数不足");
-
-            } else {
-                System.out.println("区块"+block.getHeight()+"收到ack数足够");
-                centerBlockChainService.finishBlock(block,new Date());
-            }
+        if(ackList.get(block.getHeight())==null){
+            System.out.println("区块"+block.getHeight()+"未收到ack");
+        } else if (ackList.get(block.getHeight()) < accountList.size()/2) {
+        } else {
+            System.out.println("区块"+block.getHeight()+"收到ack数足够"+df.format(new Date()));
+            centerBlockChainService.finishBlock(block,new Date());
         }
+
     }
 
     @Async
     public void executeAlloc(){
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //设置日期格式
+        int i = 0;
         while(true){
             if(!waitList.isEmpty() && !transactionPool.transactionList.isEmpty()){
-
+                i++;
                 centerTransService.allocate();
-                System.out.println("allocate");
+                System.out.println("allocate "+ i + " " + df.format(new Date()));
             }
 
         }
